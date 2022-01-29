@@ -2,7 +2,7 @@
 #![feature(asm)]
 #![feature(linkage)]
 #![feature(panic_info_message)]
-
+use core::arch::asm;
 #[macro_use]
 pub mod console;
 mod syscall;
