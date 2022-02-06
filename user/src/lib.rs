@@ -3,7 +3,7 @@
 #![feature(linkage)]
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
-
+use core::arch::asm;
 #[macro_use]
 pub mod console;
 mod lang_items;

@@ -1,28 +1,28 @@
 use lazy_static::*;
 use crate::trap::TrapContext;
 use crate::sync::UPSafeCell;
-
-const USER_STACK_SIZE: usize = 4096 * 2;
-const KERNEL_STACK_SIZE: usize = 4096 * 2;
+use core::arch::asm;
+pub const USER_STACK_SIZE: usize = 4096 * 2;
+pub const KERNEL_STACK_SIZE: usize = 4096 * 2;
 const MAX_APP_NUM: usize = 16;
-const APP_BASE_ADDRESS: usize = 0x80400000;
-const APP_SIZE_LIMIT: usize = 0x20000;
+pub const APP_BASE_ADDRESS: usize = 0x80400000;
+pub const APP_SIZE_LIMIT: usize = 0x20000;
 
 #[repr(align(4096))]
-struct KernelStack {
+pub struct KernelStack {
     data: [u8; KERNEL_STACK_SIZE],
 }
 
 #[repr(align(4096))]
-struct UserStack {
-    data: [u8; USER_STACK_SIZE],
+pub struct UserStack {
+    pub data: [u8; USER_STACK_SIZE],
 }
 
-static KERNEL_STACK: KernelStack = KernelStack { data: [0; KERNEL_STACK_SIZE] };
-static USER_STACK: UserStack = UserStack { data: [0; USER_STACK_SIZE] };
+pub static KERNEL_STACK: KernelStack = KernelStack { data: [0; KERNEL_STACK_SIZE] };
+pub static USER_STACK: UserStack = UserStack { data: [0; USER_STACK_SIZE] };
 
 impl KernelStack {
-    fn get_sp(&self) -> usize {
+    pub fn get_sp(&self) -> usize {
         self.data.as_ptr() as usize + KERNEL_STACK_SIZE
     }
     pub fn push_context(&self, cx: TrapContext) -> &'static mut TrapContext {
@@ -33,12 +33,12 @@ impl KernelStack {
 }
 
 impl UserStack {
-    fn get_sp(&self) -> usize {
+    pub fn get_sp(&self) -> usize {
         self.data.as_ptr() as usize + USER_STACK_SIZE
     }
 }
 
-struct AppManager {
+pub struct AppManager {
     num_app: usize,
     current_app: usize,
     app_start: [usize; MAX_APP_NUM + 1],
@@ -73,17 +73,19 @@ impl AppManager {
             app_src.len()
         );
         app_dst.copy_from_slice(app_src);
+        //println!("load fini");
     }
 
     pub fn get_current_app(&self) -> usize { self.current_app }
-
+    pub fn get_current_app_start(&self)->usize{ self.app_start[self.current_app-1] }
+    pub fn get_next_app_start(&self)->usize{ self.app_start[self.current_app] }
     pub fn move_to_next_app(&mut self) {
         self.current_app += 1;
     }
 }
 
 lazy_static! {
-    static ref APP_MANAGER: UPSafeCell<AppManager> = unsafe { UPSafeCell::new({
+    pub static ref APP_MANAGER: UPSafeCell<AppManager> = unsafe { UPSafeCell::new({
         extern "C" { fn _num_app(); }
         let num_app_ptr = _num_app as usize as *const usize;
         let num_app = num_app_ptr.read_volatile();
@@ -118,6 +120,7 @@ pub fn run_next_app() -> ! {
     drop(app_manager);
     // before this we have to drop local variables related to resources manually
     // and release the resources
+    //println!("fini");
     extern "C" { fn __restore(cx_addr: usize); }
     unsafe {
         __restore(KERNEL_STACK.push_context(
