@@ -15,13 +15,16 @@ pub fn sys_write(fd: usize, buf: *const u8, len: usize) -> isize {
             let current_app = app_manager.get_current_app();
             let current_app_start=app_manager.get_current_app_start();
             let current_app_end=app_manager.get_next_app_start();
-            unsafe {println!("#{:#x} {:#x} #", buf as usize , USER_STACK.get_sp() - USER_STACK_SIZE);}
+            let top=(user_sscratch + USER_STACK_SIZE - 1) & (!(USER_STACK_SIZE - 1));
+            let bottom=top-0x1000;
+            unsafe {println!("# buf:{:#x} len:{} bottom:{:#x} top:{:#x} #", buf as usize , len, bottom ,top);}
             //println!("write: {:#x} - {:#x}",buf as usize,buf as usize+len);
             //println!("app: {} is {:#x} - {:#x}",current_app,current_app_start,current_app_end);
             //println!("stack:{:#x} - {:#x}\n",user_sscratch,(USER_STACK.data.as_ptr() as usize+USER_STACK_SIZE));
             let addr=buf as usize;
-            if (((buf as usize)  >= USER_STACK.get_sp() - USER_STACK_SIZE) && ((buf as usize) + len <= USER_STACK.get_sp())) 
-            || (((buf as usize) + len <= APP_SIZE_LIMIT + APP_BASE_ADDRESS) && ((buf as usize) >= APP_BASE_ADDRESS)){
+
+            if ( (((buf as usize)  >= bottom ) && ((buf as usize) + len <= top)) 
+            || ( ((buf as usize) + len <= APP_SIZE_LIMIT + APP_BASE_ADDRESS) && ((buf as usize) >= APP_BASE_ADDRESS))){
             //if(true){
 
              let slice = unsafe { core::slice::from_raw_parts(buf, len) };
