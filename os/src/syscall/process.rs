@@ -1,6 +1,6 @@
 use crate::task::{
     suspend_current_and_run_next,
-    exit_current_and_run_next,
+    exit_current_and_run_next, set_priority,
 };
 use crate::timer::get_time_us;
 
@@ -35,4 +35,13 @@ pub fn sys_get_time(ts: *mut TimeVal, _tz: usize) -> isize {
         };
     }
     0
+}
+pub fn sys_set_priority(priority:isize) -> isize{
+    if(priority<2){
+        -1
+    }
+    else{
+        set_priority(priority);
+        priority 
+    }
 }

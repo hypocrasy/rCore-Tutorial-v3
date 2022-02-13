@@ -4,6 +4,8 @@ use super::TaskContext;
 pub struct TaskControlBlock {
     pub task_status: TaskStatus,
     pub task_cx: TaskContext,
+    pub task_priority:usize,
+    pub task_stride:usize,
 }
 
 #[derive(Copy, Clone, PartialEq)]

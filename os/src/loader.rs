@@ -82,3 +82,6 @@ pub fn init_app_cx(app_id: usize) -> usize {
         TrapContext::app_init_context(get_base_i(app_id), USER_STACK[app_id].get_sp()),
     )
 }
+pub fn get_user_sp() -> usize{
+    USER_STACK[0].get_sp()
+}

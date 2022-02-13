@@ -7,7 +7,7 @@ extern crate user_lib;
 extern crate core;
 use core::slice;
 use user_lib::{write, STDOUT};
-
+use core::arch::asm;
 /// 正确输出：
 /// Test write0 OK!
 
