@@ -8,6 +8,7 @@ use riscv::register::satp;
 use alloc::sync::Arc;
 use lazy_static::*;
 use crate::sync::UPSafeCell;
+use core::arch::asm;
 use crate::config::{
     MEMORY_END,
     PAGE_SIZE,
