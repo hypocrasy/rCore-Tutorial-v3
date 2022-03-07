@@ -23,6 +23,6 @@ pub fn sys_yield() -> isize {
 }
 
 pub fn sys_get_time() -> isize {
-    let _us = get_time_us();
-    _us as isize
+     get_time_us() as isize
+   
 }

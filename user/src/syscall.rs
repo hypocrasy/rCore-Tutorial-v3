@@ -134,8 +134,8 @@ pub fn sys_yield() -> isize {
     syscall(SYSCALL_YIELD, [0, 0, 0])
 }
 
-pub fn sys_get_time(time: &TimeVal, tz: usize) -> isize {
-    syscall(SYSCALL_GETTIMEOFDAY, [time as *const _ as usize, tz, 0])
+pub fn sys_get_time() -> isize {
+    syscall(SYSCALL_GETTIMEOFDAY, [0, 0, 0])
 }
 
 pub fn sys_getpid() -> isize {

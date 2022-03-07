@@ -2,6 +2,7 @@ use super::{frame_alloc, PhysPageNum, FrameTracker, VirtPageNum, VirtAddr, StepB
 use alloc::vec::Vec;
 use alloc::vec;
 use bitflags::*;
+use riscv::addr::Page;
 
 bitflags! {
     pub struct PTEFlags: u8 {
@@ -82,9 +83,11 @@ impl PageTable {
             let pte = &mut ppn.get_pte_array()[idxs[i]];
             if i == 2 {
                 result = Some(pte);
+                //if(usize::from(vpn)==0x10000){let x=&result.unwrap().flags().bits();println!{"pte:{}",x}};
                 break;
             }
             if !pte.is_valid() {
+                
                 let frame = frame_alloc().unwrap();
                 *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
                 self.frames.push(frame);
@@ -108,6 +111,7 @@ impl PageTable {
             }
             ppn = pte.ppn();
         }
+        //println!("vpn:{:#x},pte:{}",usize::from(vpn),result.unwrap().bits);
         result
     }
     #[allow(unused)]
@@ -119,6 +123,7 @@ impl PageTable {
     #[allow(unused)]
     pub fn unmap(&mut self, vpn: VirtPageNum) {
         let pte = self.find_pte_create(vpn).unwrap();
+        //if(usize::from(vpn)==0x10000){println!("pte:{}",pte.bits);}
         assert!(pte.is_valid(), "vpn {:?} is invalid before unmapping", vpn);
         *pte = PageTableEntry::empty();
     }
@@ -154,4 +159,7 @@ pub fn translated_byte_buffer(token: usize, ptr: *const u8, len: usize) -> Vec<&
         start = end_va.into();
     }
     v
+}
+pub fn new_pagetable(satp:usize) -> PageTable{
+     PageTable::from_token(satp) 
 }

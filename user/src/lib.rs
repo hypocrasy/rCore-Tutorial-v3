@@ -163,11 +163,7 @@ pub fn yield_() -> isize {
 }
 
 pub fn get_time() -> isize {
-    let time = TimeVal::new();
-    match sys_get_time(&time, 0) {
-        0 => ((time.sec & 0xffff) * 1000 + time.usec / 1000) as isize,
-        _ => -1,
-    }
+    sys_get_time()
 }
 
 pub fn getpid() -> isize {

@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use riscv::register::satp;
 use alloc::sync::Arc;
 use lazy_static::*;
+use crate::console::print;
 use crate::sync::UPSafeCell;
 use core::arch::asm;
 use crate::config::{
@@ -52,13 +53,23 @@ impl MemorySet {
         self.page_table.token()
     }
     /// Assume that no conflicts.
+    fn debug(&self){
+        for i in &self.areas{
+            for j in &i.data_frames{
+                println!("vpn:{:#x},ppn:{:#x}",j.0.0,j.1.ppn.0);
+            }
+            
+        }
+    }
     pub fn insert_framed_area(&mut self, start_va: VirtAddr, end_va: VirtAddr, permission: MapPermission) {
+        
         self.push(MapArea::new(
             start_va,
             end_va,
             MapType::Framed,
             permission,
         ), None);
+        //self.debug();
     }
     fn push(&mut self, mut map_area: MapArea, data: Option<&[u8]>) {
         map_area.map(&mut self.page_table);
@@ -67,6 +78,15 @@ impl MemorySet {
         }
         self.areas.push(map_area);
     }
+    pub fn delete(&mut self,vpn:VirtPageNum){
+        for i in (0..self.areas.len()){
+            if(vpn>=self.areas[i].vpn_range.get_start()&&vpn<self.areas[i].vpn_range.get_end()){
+                self.areas[i].unmap_one(&mut self.page_table,vpn);
+            }
+            
+        }
+    }
+
     /// Mention that trampoline is not collected by areas.
     fn map_trampoline(&mut self) {
         self.page_table.map(
@@ -189,6 +209,12 @@ impl MemorySet {
     pub fn translate(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {
         self.page_table.translate(vpn)
     }
+    pub fn find_vpn(&self,vpn:VirtPageNum) -> bool {
+        match self.translate(vpn){
+            None => {return false},
+            Some(x)=>{x.is_valid()},
+        }
+    }
 }
 
 pub struct MapArea {
@@ -241,6 +267,7 @@ impl MapArea {
     }
     pub fn map(&mut self, page_table: &mut PageTable) {
         for vpn in self.vpn_range {
+            //println!("map:{}",usize::from(vpn));
             self.map_one(page_table, vpn);
         }
     }

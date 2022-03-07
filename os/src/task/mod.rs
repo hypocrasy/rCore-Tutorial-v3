@@ -3,6 +3,7 @@ mod switch;
 mod task;
 
 use crate::loader::{get_num_app, get_app_data};
+use crate::mm::{MemorySet,VirtAddr,MapPermission, VirtPageNum, PageTableEntry};
 use crate::trap::TrapContext;
 use crate::sync::UPSafeCell;
 use lazy_static::*;
@@ -115,6 +116,25 @@ impl TaskManager {
             panic!("All applications completed!");
         }
     }
+    fn memory_set_insert(&self,start_va: VirtAddr, end_va: VirtAddr, permission: MapPermission){
+        
+        let mut inner=self.inner.exclusive_access();
+        let current_app=inner.current_task;
+        inner.tasks[current_app].memory_set.insert_framed_area(start_va,end_va,permission);
+    }
+    fn memory_set_free(&self,start_va: VirtPageNum,end_va: VirtPageNum){
+        let mut inner=self.inner.exclusive_access();
+        let current_app=inner.current_task;
+        for i in(usize::from(start_va)..usize::from(end_va)){
+            //println!("delete:{:#x}",i);
+            inner.tasks[current_app].memory_set.delete(VirtPageNum::from(i));
+        }
+    }
+    fn find_vpn(&self,vpn:VirtPageNum) ->bool{
+        let mut inner=self.inner.exclusive_access();
+        let current_app=inner.current_task;
+        inner.tasks[current_app].memory_set.find_vpn(vpn)
+    }  
 }
 
 pub fn run_first_task() {
@@ -146,7 +166,15 @@ pub fn exit_current_and_run_next() {
 pub fn current_user_token() -> usize {
     TASK_MANAGER.get_current_token()
 }
-
+pub fn current_user_insert(start_va: VirtAddr, end_va: VirtAddr, permission: MapPermission){
+    TASK_MANAGER.memory_set_insert(start_va, end_va, permission)
+}
+pub fn current_user_free(start_va:VirtPageNum,end_va:VirtPageNum){
+    TASK_MANAGER.memory_set_free(start_va,end_va);
+}
 pub fn current_trap_cx() -> &'static mut TrapContext {
     TASK_MANAGER.get_current_trap_cx()
+}
+pub fn find_vpn(vpn:VirtPageNum) -> bool{
+    TASK_MANAGER.find_vpn(vpn)
 }
