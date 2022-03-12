@@ -7,6 +7,7 @@ use alloc::vec::Vec;
 use riscv::register::satp;
 use alloc::sync::Arc;
 use lazy_static::*;
+use core::arch::{asm,global_asm};
 use crate::sync::UPSafeCell;
 use crate::config::{
     MEMORY_END,
