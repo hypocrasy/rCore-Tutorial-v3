@@ -13,7 +13,7 @@ const BS: u8 = 0x08u8;
 
 use alloc::string::String;
 use user_lib::console::getchar;
-use user_lib::{exec, flush, fork, waitpid};
+use user_lib::{exec, flush, fork, waitpid,exit};
 
 #[no_mangle]
 pub fn main() -> i32 {
@@ -27,6 +27,7 @@ pub fn main() -> i32 {
             LF | CR => {
                 println!("");
                 if !line.is_empty() {
+                    //if(line=="q"){exit(0)};
                     line.push('\0');
                     let pid = fork();
                     if pid == 0 {
