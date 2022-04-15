@@ -1,3 +1,4 @@
+use core::arch::{global_asm,asm};
 global_asm!(include_str!("switch.S"));
 
 use super::TaskContext;

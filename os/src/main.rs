@@ -9,7 +9,7 @@ extern crate alloc;
 
 #[macro_use]
 extern crate bitflags;
-
+use core::arch::{global_asm,asm};
 #[macro_use]
 mod console;
 mod lang_items;
