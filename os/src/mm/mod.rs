@@ -15,6 +15,7 @@ pub use page_table::{
     translated_str,
     translated_ref,
     translated_refmut,
+    translate_va,
     UserBuffer,
     UserBufferIterator,
 };

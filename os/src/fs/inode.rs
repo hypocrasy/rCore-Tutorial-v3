@@ -1,6 +1,6 @@
 use easy_fs::{
     EasyFileSystem,
-    Inode,
+    Inode, DirEntry, DiskInodeType,
 };
 use crate::drivers::BLOCK_DEVICE;
 use crate::sync::UPSafeCell;
@@ -8,7 +8,7 @@ use alloc::sync::Arc;
 use lazy_static::*;
 use bitflags::*;
 use alloc::vec::Vec;
-use super::File;
+use super::{File, StatMode};
 use crate::mm::UserBuffer;
 
 pub struct OSInode {
@@ -67,7 +67,19 @@ pub fn list_apps() {
     }
     println!("**************/");
 }
-
+pub fn find_app(path:&str) ->Option<Arc<Inode>>{
+    //println!("old path:{}",path);
+    ROOT_INODE.find(path)
+}
+pub fn root_insert_dirent(dirent:DirEntry){
+    ROOT_INODE.insert_dirent(dirent);
+}
+pub fn root_delete_dirent(file:&str) ->i32{
+    ROOT_INODE.delete_dirent(file)
+}
+pub fn root_get_nlink_by_id(inode_id:u32) ->u32{
+    ROOT_INODE.nlink(inode_id)
+}
 bitflags! {
     pub struct OpenFlags: u32 {
         const RDONLY = 0;
@@ -156,4 +168,25 @@ impl File for OSInode {
         }
         total_write_size
     }
+    fn get_inode_id(&self) ->u64{
+        let inode=&self.inner.exclusive_access().inode;
+        inode.get_inode_id() as u64
+    }
+    fn get_mode(&self) ->StatMode{
+    //println!("inode mode");   
+    let inode=&self.inner.exclusive_access().inode;
+    //println!("inode id:{}",inode.get_inode_id());
+    match inode.get_mode() {
+        
+        DiskInodeType::Directory =>{
+            return StatMode::DIR;
+        }
+        DiskInodeType::File =>{
+            return StatMode::FILE;
+        }
+        
+
+    }
+   }
+   
 }

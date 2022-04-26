@@ -2,7 +2,7 @@ use super::File;
 use alloc::sync::{Arc, Weak};
 use crate::sync::UPSafeCell;
 use crate::mm::UserBuffer;
-
+use crate::fs::StatMode;
 use crate::task::suspend_current_and_run_next;
 
 pub struct Pipe {
@@ -164,5 +164,11 @@ impl File for Pipe {
                 }
             }
         }
+    }
+    fn get_inode_id(&self) -> u64 {
+        1
+    }
+    fn get_mode(&self) -> StatMode{
+        StatMode::FILE
     }
 }

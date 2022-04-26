@@ -1,5 +1,4 @@
 #![no_std]
-#![feature(asm)]
 #![feature(linkage)]
 #![feature(panic_info_message)]
 #![feature(alloc_error_handler)]
@@ -96,7 +95,7 @@ pub struct Stat {
     /// number of hard links
     pub nlink: u32,
     /// unused pad
-    pad: [u64; 7],
+    pub pad: [u64; 7],
 }
 
 impl Stat {
@@ -105,7 +104,7 @@ impl Stat {
             dev: 0,
             ino: 0,
             mode: StatMode::NULL,
-            nlink: 0,
+            nlink: 1,
             pad: [0; 7],
         }
     }

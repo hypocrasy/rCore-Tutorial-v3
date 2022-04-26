@@ -118,6 +118,7 @@ impl EasyFileSystem {
         let (block_id, block_offset) = efs.lock().get_disk_inode_pos(0);
         // release efs lock
         Inode::new(
+            0,
             block_id,
             block_offset,
             Arc::clone(efs),

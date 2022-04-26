@@ -1,4 +1,4 @@
-use super::File;
+use super::{File, StatMode};
 use crate::mm::{UserBuffer};
 use crate::sbi::console_getchar;
 use crate::task::suspend_current_and_run_next;
@@ -30,6 +30,13 @@ impl File for Stdin {
     fn write(&self, _user_buf: UserBuffer) -> usize {
         panic!("Cannot write to stdin!");
     }
+    fn get_inode_id(&self) -> u64 {
+        1
+    }
+    fn get_mode(&self) -> StatMode{
+        StatMode::FILE
+    }
+
 }
 
 impl File for Stdout {
@@ -44,4 +51,11 @@ impl File for Stdout {
         }
         user_buf.len()
     }
+    fn get_inode_id(&self) -> u64 {
+        1
+    }
+    fn get_mode(&self) -> StatMode{
+        StatMode::FILE
+    }
+
 }

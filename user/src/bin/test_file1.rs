@@ -16,8 +16,9 @@ pub fn main() -> i32 {
     let stat: Stat = Stat::new();
     let ret = fstat(fd, &stat);
     assert_eq!(ret, 0);
-    assert_eq!(stat.mode, StatMode::FILE);
     assert_eq!(stat.nlink, 1);
+    assert_eq!(stat.mode, StatMode::FILE);
+    
     close(fd);
     // unlink(fname);
     // It's recommended to rebuild the disk image. This program will not clean the file "fname1".
